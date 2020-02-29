@@ -128,6 +128,9 @@ Any contribution is welcome. All issues and pull requests are highly appreciated
 If you have any questions when using athena-signal, or any ideas to make it better, 
 please feel free to contact us.
 
+We are seeking cooperation opportunities in any form.
+We appreciate your suggestions and feedback.
+
 ## Acknowledgement
 
-Athena-signal is built with the help of some open-source repos such as WebRTC, speex, etc. We thank to them.
+Athena-signal is built with the help of some open-source repos such as WebRTC, speex, etc.
