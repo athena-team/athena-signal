@@ -14,22 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef _DIOS_SSP_RETURN_DEFS_H_
-#define _DIOS_SSP_RETURN_DEFS_H_
+#ifndef _DIOS_SSP_DOA_MACROS_H_
+#define _DIOS_SSP_DOA_MACROS_H_
 
-typedef enum 
-{
-	OK_AUDIO_PROCESS,
-	ERROR_AUDIO_PROCESS,
-	ERROR_AEC,
-	ERROR_VAD,
-    ERROR_MVDR,
-	ERROR_GSC,
-	ERROR_DOA,
-	ERROR_HPF,
-	ERROR_NS,
-	ERROR_AGC
-} FUN_RETURN;
+#define VELOCITY                    (340.0f)
+#define PI                          (3.141592653589793f)
+#define	DEFAULT_DOA_SAMPLING_FRQ	16000
+#define	DEFAULT_DOA_WIN_SIZE		512
+#define	DEFAULT_DOA_SHIFT_SIZE		128
+#define	DEFAULT_DOA_DELTA_ANGLE		5
+#define	DEFAULT_DOA_LOW_FRQ			2000
+#define	DEFAULT_DOA_HIGH_FRQ		6000
+#define	DEFAULT_DOA_FRQ_SP			200
+#define	DEFAULT_DOA_EPS				1073
+#define	DEFAULT_DOA_ALPHA_RXX		(0.9f)
 
-#endif  /* _DIOS_SSP_RETURN_DEFS_H_ */
+#endif /* _DIOS_SSP_DOA_MACROS_H_ */
 

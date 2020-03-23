@@ -8,8 +8,9 @@ Athena-signal is mainly implemented using C, and called by python.
 
 ## Introduction of athena-signal modules
 
-Currently athena-signal is composed of such modules as Acoustic Echo Cancellation(AEC), High Pass Filter(HPF), Minimum Variance Distortionless Response(MVDR) beamformer, 
-Voice Activity Detection(VAD), Noise Supression(NS), Automatic Gain Control(AGC).
+Currently athena-signal is composed of such modules as Acoustic Echo Cancellation(AEC), High Pass Filter(HPF), Direction Of Arrival(DOA), 
+Minimum Variance Distortionless Response(MVDR) beamformer, Generalized Sidelobe Canceller(GSC),
+Voice Activity Detection(VAD), Noise Supression(NS), and Automatic Gain Control(AGC).
 
 ### Detailed description of each module
 
@@ -17,10 +18,15 @@ Voice Activity Detection(VAD), Noise Supression(NS), Automatic Gain Control(AGC)
 and residual echo suppression. 
 - HPF: High-pass filtering is implemented using cascaded-iir-filter. The cut-off frequency is 200Hz in this program. You can rewrite the iir filter
 coefficients and gains, with the help of filter design toolbox in MATLAB, to generate high-pass filter with cut-off frequency you set.
-- MVDR: This is a Minimum Variance Distortionless Response beamformer. At present you have to set the steering vector(loc_phi) by yourself, which
+- DOA: Capon algorithm is used to get the direction of the sound source. 
+The main function of the Capon algorithm is the Capon beamformer, also called MVDR. 
+The Capon spectrum is estimated by using Rxx matrix and steering vector in frequency domain.
+- MVDR: This is a Minimum Variance Distortionless Response beamformer. You can set the steering vector(loc_phi) with the help of DOA estimation, which
 indicates the distortionless response direction. Rnn matrix is estimated using MCRA noise estimation method. Microphone array could be any shape as long as you
 set the coordinates of each microphones(mic_coord) beforehand. In the future edition, the steering vector will be estimated by DOA estimation.
 You can set the steering vector by your own DOA estimation method of course.
+- GSC: This is a Generalized Sidelobe Canceller beamformer,
+It is composed of Fixed Beamformer(FBF), Adaptive Blocking Matrix(ABM) and the Adaptive Interference Canceller(AIC) modules.
 - VAD: Voice Activity Detection(VAD) function outputs the current frame speech state based on the result of the double-talk detection.
 - NS: Noise reduction algorithm is based on MCRA noise estimation method.
 Details can be found in "Noise Estimation by Minima Controlled Recursive Averaging for Robust Speech Enhancement" and "Noise Spectrum Estimation in
@@ -31,16 +37,16 @@ Each modules has a separate switch that controls the operating status of the mod
 
 ## Athena-signal operating instructions
 
-1. Before use, you need to set the switches of each module to determine the modules to be run or not. 
+1. You need to set the switches of each module to determine whether it is enabled or not. 
 Enter the number of mic and reference, and the coordinates of each microphone. 
-In this framework, the function switches AEC_KEY, HPF_KEY, MVDR_KEY, NS_KEY, AGC_KEY exist in the AEC, HPF, MVDR, NS, AGC. 
 When the switch is set to 1, it is in the running state, and when it is 0, the module will be skipped.
 Generally you have to manually set the number of microphones and reference channels, and the coordinates for each microphone. 
-The coordinates MUST be set when MVDR is enabled.
+The coordinates MUST be set when MVDR, GSC or DOA module is enabled.
 2. You can set the length of the read and write data array_frm_len, and it is 128 by default, 
 ptr_input_data and ptr_ref_data store the microphone signal data and reference signal data, respectively. 
 The multi-channel microphone signals are stored in the form of parallel input, that is, the data of each channel is sequentially stored in ptr_input_data. 
 3. Since MVDR requires the angle of incidence of the sound source, we set it to 90 by default. 
+When the DOA module is enabled, the steering vector will be estimated by DOA estimation.
 MVDR supports ANY array setups, including circular array and linear array, as long as you set the coordinates of microphones mic_coord beforehand. 
 	
 ## Requirements
@@ -76,16 +82,20 @@ MVDR supports ANY array setups, including circular array and linear array, as lo
 ## Configures Setting[Options]
     
     config(dictionary):
-        --add_AEC         : If True, do AEC on  signal.
-                            (bool, default = True)
-        --add_NS         : If True, do NS on signal.
-                            (bool, default = True)
-        --add_AGC         : If True, do AGC on signal.
-                            (bool, default = False)
-        --add_HPF         : If True, do HPF on signal.
-                            (bool, default = False)
-        --add_MVDR        : If True, do MVDR on signal.
-                            (bool, default = False)
+        --add_AEC         : If 1, do AEC on  signal.
+                            (int, default = 1)
+        --add_NS          : If 1, do NS on signal.
+                            (int, default = 1)
+        --add_AGC         : If 1, do AGC on signal.
+                            (int, default = 0)
+        --add_HPF         : If 1, do HPF on signal.
+                            (int, default = 0)
+        --add_BF          : If 1, do MVDR on signal.
+                            (int, default = 0)
+                          : If 2, do GSC on signal.
+                            (int, default = 0)
+        --add_DOA         : If 1, do DOA on signal.
+                            (int, default = 0)
         --mic_num         : Number of microphones.
                             (int, default = 1)
         --ref_num         : Number of reference channel.
@@ -102,10 +112,10 @@ MVDR supports ANY array setups, including circular array and linear array, as lo
     input_file = ["examples/0841-0875_env7_sit1_male_in.pcm"]
     ref_file = ["examples/0841-0875_env7_sit1_male_ref.pcm"]
     out_file = ["examples/0841-0875_env7_sit1_male_out.pcm"]
-    config = {'add_AEC': True, 'add_MVDR': False}
+    config = {'add_AEC': 1, 'add_BF': 0}
     athena_signal_process(input_file, out_file, ref_file, config)
     
-    # Test MVDR
+    # Test BF
     input_file = ["examples/m0f60_5cm_1_mix.pcm",
                   "examples/m0f60_5cm_2_mix.pcm",
                   "examples/m0f60_5cm_3_mix.pcm",
@@ -113,7 +123,7 @@ MVDR supports ANY array setups, including circular array and linear array, as lo
                   "examples/m0f60_5cm_5_mix.pcm",
                   "examples/m0f60_5cm_6_mix.pcm"]
     out_file = ["examples/m0f60_5cm_mvdr_out.pcm"]
-    config = {'add_AEC': False, 'add_MVDR': True, 'mic_num': 6}
+    config = {'add_AEC': 0, 'add_BF': 1, 'add_DOA': 1, 'mic_num': 6}
     mic_coord = [[0.05, 0.0, 0.0],
                  [0.025, 0.0433, 0.0],
                  [-0.025, 0.0433, 0.0],
@@ -130,4 +140,4 @@ please feel free to contact us.
 
 ## Acknowledgement
 
-Athena-signal is built with the help of some open-source repos such as WebRTC, speex, etc. We thank to them.
+Athena-signal is built with the help of some open-source repos such as WebRTC, speex, etc.

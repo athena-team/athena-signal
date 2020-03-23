@@ -34,6 +34,8 @@ typedef struct {
     void* ptr_ns;
 	void* ptr_agc;
     void* ptr_mvdr;
+    void* ptr_gsc;
+    void* ptr_doa;
 
     /* necessary buffer definition */
 	float* ptr_mic_buf;
@@ -57,7 +59,7 @@ void* dios_ssp_init_api(objSSP_Param *SSP_PARAM)
 {
     int i;
 	void* ptr = NULL;
-	ptr = (void*)malloc(sizeof(objDios_ssp));
+	ptr = (void*)calloc(1, sizeof(objDios_ssp));
 	objDios_ssp* srv = (objDios_ssp*)ptr;
     
     // params init
@@ -80,9 +82,17 @@ void* dios_ssp_init_api(objSSP_Param *SSP_PARAM)
     {
         srv->ptr_aec = dios_ssp_aec_init_api(srv->cfg_mic_num, srv->cfg_ref_num, srv->cfg_frame_len);
     }
-    if(SSP_PARAM->MVDR_KEY == 1)
-    {        
+    if(SSP_PARAM->DOA_KEY == 1)
+    {
+        srv->ptr_doa = dios_ssp_doa_init_api(srv->cfg_mic_num, (PlaneCoord*)srv->cfg_mic_coord);
+    }
+    if(SSP_PARAM->BF_KEY == 1)
+    {
         srv->ptr_mvdr = dios_ssp_mvdr_init_api(srv->cfg_mic_num, (void*)srv->cfg_mic_coord);
+    }
+    if(SSP_PARAM->BF_KEY == 2)
+    {
+        srv->ptr_gsc = dios_ssp_gsc_init_api(srv->cfg_mic_num, (void*)srv->cfg_mic_coord);
     }
     //dios_ssp_aec_config_api(srv->ptr_aec, 0);  // 0: communication mode; 1: asr mode
     srv->ptr_vad = dios_ssp_vad_init_api();
@@ -104,6 +114,7 @@ void* dios_ssp_init_api(objSSP_Param *SSP_PARAM)
     // variables init 
     srv->dt_st = 1;
     srv->vad_result = 1;
+    srv->cfg_wakeup_loc_phi = 90;
 
 	return ptr;
 }
@@ -140,12 +151,30 @@ int dios_ssp_reset_api(void* ptr, objSSP_Param *SSP_PARAM)
         }
     }
 
-    if(SSP_PARAM->MVDR_KEY == 1)
+    if(SSP_PARAM->DOA_KEY == 1)
+    {
+        ret = dios_ssp_doa_reset_api(srv->ptr_doa);
+        if(ret != 0)
+        {
+            return ERROR_DOA;
+        }
+    }
+    
+    if(SSP_PARAM->BF_KEY == 1)
     {
         ret = dios_ssp_mvdr_reset_api(srv->ptr_mvdr);
         if(ret != 0)
         {
             return ERROR_MVDR;
+        }
+    }
+
+    if(SSP_PARAM->BF_KEY == 2)
+    {
+        ret = dios_ssp_gsc_reset_api(srv->ptr_gsc);
+        if(ret != 0)
+        {
+            return ERROR_GSC;
         }
     }
 
@@ -231,14 +260,28 @@ int dios_ssp_process_api(void* ptr, short* mic_buf, short* ref_buf, short* out_b
     // save mic1
     memcpy(srv->ptr_data_buf, &srv->ptr_mic_buf[0], srv->cfg_frame_len * sizeof(float));
 
-    // MVDR process
-    if(SSP_PARAM->MVDR_KEY == 1)
+    if(SSP_PARAM->DOA_KEY == 1)
     {
-        srv->cfg_wakeup_loc_phi = 90;
+        srv->cfg_wakeup_loc_phi = dios_ssp_doa_process_api(srv->ptr_doa, srv->ptr_mic_buf, srv->vad_result, srv->dt_st);
+    }
+    
+    // MVDR process
+    if(SSP_PARAM->BF_KEY == 1)
+    {
         ret = dios_ssp_mvdr_process_api(srv->ptr_mvdr, srv->ptr_mic_buf, srv->ptr_data_buf, srv->cfg_wakeup_loc_phi);
         if(ret != 0)
         {
             return ERROR_MVDR;
+        }
+    }
+
+    //GSC process
+    if(SSP_PARAM->BF_KEY == 2)
+    {
+        ret = dios_ssp_gsc_process_api(srv->ptr_gsc, srv->ptr_mic_buf, srv->ptr_data_buf, srv->cfg_wakeup_loc_phi);
+        if(ret != 0)
+        {
+            return ERROR_GSC;
         }
     }
     
@@ -324,13 +367,31 @@ int dios_ssp_uninit_api(void* ptr, objSSP_Param *SSP_PARAM)
             return ERROR_AEC;
         }
     }
+
+    if(SSP_PARAM->DOA_KEY == 1)
+    {
+        ret = dios_ssp_doa_uninit_api(srv->ptr_doa);
+        if(ret != 0)
+        {
+            return ERROR_DOA;
+        }
+    }
     
-    if(SSP_PARAM->MVDR_KEY == 1)
+    if(SSP_PARAM->BF_KEY == 1)
     {
         ret = dios_ssp_mvdr_uninit_api(srv->ptr_mvdr);
         if(ret != 0)
         {
             return ERROR_MVDR;
+        }
+    }
+
+    if(SSP_PARAM->BF_KEY == 2)
+    {
+        ret = dios_ssp_gsc_uninit_api(srv->ptr_gsc);
+        if(ret != 0)
+        {
+            return ERROR_GSC;
         }
     }
 

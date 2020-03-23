@@ -167,7 +167,7 @@ typedef struct {
 void* dios_ssp_ns_init_api(int frame_len)
 {
 	void* ptr = NULL;
-	ptr = (void*)malloc(sizeof(objNSMMSE));
+	ptr = (void*)calloc(1, sizeof(objNSMMSE));
 	objNSMMSE* srv = (objNSMMSE*)ptr;
 
 	srv->frame_len = frame_len;
@@ -581,7 +581,7 @@ int mmse_process(objNSMMSE* srv, float *in_data, float *out_data)
 		{
 			srv->m_re[i] = srv->fft_out[i];
 		}
-		srv->m_im[0] = srv->m_im[NS_FFT_LEN - 1] = 0.0;
+		srv->m_im[0] = srv->m_im[NS_FFT_LEN / 2] = 0.0;
 		for (i = 1; i < NS_SUBBAND_NUM - 1; i++)
 		{
 			srv->m_im[i] = -srv->fft_out[NS_FFT_LEN - i];

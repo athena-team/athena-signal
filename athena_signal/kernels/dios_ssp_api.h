@@ -20,13 +20,14 @@ limitations under the License.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <fstream>
 #include "./dios_ssp_hpf/dios_ssp_hpf_api.h"
 #include "./dios_ssp_vad/dios_ssp_vad_api.h"
 #include "./dios_ssp_aec/dios_ssp_aec_api.h"
 #include "./dios_ssp_ns/dios_ssp_ns_api.h"
 #include "./dios_ssp_agc/dios_ssp_agc_api.h"
 #include "./dios_ssp_mvdr/dios_ssp_mvdr_api.h"
+#include "./dios_ssp_doa/dios_ssp_doa_api.h"
+#include "./dios_ssp_gsc/dios_ssp_gsc_api.h"
 
 typedef struct 
 {
@@ -34,7 +35,8 @@ typedef struct
     short NS_KEY;
     short AGC_KEY;
     short HPF_KEY;
-    short MVDR_KEY;
+    short BF_KEY;
+    short DOA_KEY;
 
     int mic_num;
     int ref_num;

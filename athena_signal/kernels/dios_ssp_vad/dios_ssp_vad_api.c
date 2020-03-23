@@ -39,7 +39,7 @@ void* dios_ssp_vad_init_api(void)
 {
 	void* ptr_vad = NULL;
 	objVadProcess *srv;
-	ptr_vad = (void*)malloc(sizeof(objVadProcess));
+	ptr_vad = (void*)calloc(1, sizeof(objVadProcess));
 	srv = (objVadProcess *)ptr_vad;
 
     srv->energy_vad_ptr = dios_ssp_energy_vad_init(0);

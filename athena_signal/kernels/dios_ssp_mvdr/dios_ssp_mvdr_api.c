@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Description: This is a Minimum Variance Distortionless Response beamformer. At
-present you have to set the steering vector(loc_phi) by yourself, which
-indicates the distortionless response direction. Rnn matrix is estimated using
-MCRA noise estimation method. Microphone array could be any shape as long as you
-set the coordinates of each microphones(mic_coord) beforehand.
-
-In the future edition, the steering vector will be estimated by DOA estimation.
-You can set the steering vector by your own DOA estimation method of course.
+Description: This is a Minimum Variance Distortionless Response beamformer.
+When the DOA module is disabled, you can set the steering vector(loc_phi) by
+yourself, which indicates the distortionless response direction.
+When the DOA module is enabled, the steering vector will be estimated by DOA
+estimation. You can set the steering vector by your own DOA estimation method.
+Rnn matrix is estimated using MCRA noise estimation method. 
+Microphone array could be any shape as long as you set the coordinates of each 
+microphones(mic_coord) beforehand.
 ==============================================================================*/
 
 #include "dios_ssp_mvdr_api.h"

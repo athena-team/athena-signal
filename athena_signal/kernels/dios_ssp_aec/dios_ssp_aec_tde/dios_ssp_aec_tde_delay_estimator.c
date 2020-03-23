@@ -278,7 +278,7 @@ BinaryDelayEstimatorFarend* dios_ssp_aec_tde_creatbinarydelayestimatorfarend(int
     if (history_size > 1)
     {
         // Sanity conditions fulfilled.
-        self = (BinaryDelayEstimatorFarend*)malloc(sizeof(BinaryDelayEstimatorFarend));
+        self = (BinaryDelayEstimatorFarend*)calloc(1, sizeof(BinaryDelayEstimatorFarend));
     }
     if (self != NULL)
     {
@@ -287,10 +287,10 @@ BinaryDelayEstimatorFarend* dios_ssp_aec_tde_creatbinarydelayestimatorfarend(int
         self->history_size = history_size;
 
         // Allocate memory for history buffers.
-        self->binary_far_history = (unsigned int*)malloc(history_size * sizeof(unsigned int));
+        self->binary_far_history = (unsigned int*)calloc(history_size, sizeof(unsigned int));
         malloc_fail |= (self->binary_far_history == NULL);
 
-        self->far_bit_counts = (int*)malloc(history_size * sizeof(int));
+        self->far_bit_counts = (int*)calloc(history_size, sizeof(int));
         malloc_fail |= (self->far_bit_counts == NULL);
 
         if (malloc_fail)
@@ -372,7 +372,7 @@ BinaryDelayEstimator* dios_ssp_aec_tde_creatbinarydelayestimator(BinaryDelayEsti
     if ((farend != NULL) && (max_lookahead >= 0))
     {
         // Sanity conditions fulfilled.
-        self = (BinaryDelayEstimator*)malloc(sizeof(BinaryDelayEstimator));
+        self = (BinaryDelayEstimator*)calloc(1, sizeof(BinaryDelayEstimator));
     }
 
     if (self != NULL)
@@ -386,17 +386,17 @@ BinaryDelayEstimator* dios_ssp_aec_tde_creatbinarydelayestimator(BinaryDelayEsti
         self->lookahead = max_lookahead;
 
         
-        self->mean_bit_counts = (int*)malloc((farend->history_size + 1) * sizeof(int));
+        self->mean_bit_counts = (int*)calloc((farend->history_size + 1), sizeof(int));
         malloc_fail |= (self->mean_bit_counts == NULL);
 
-        self->bit_counts = (int*)malloc(farend->history_size * sizeof(int));
+        self->bit_counts = (int*)calloc(farend->history_size, sizeof(int));
         malloc_fail |= (self->bit_counts == NULL);
 
         // Allocate memory for history buffers.
-        self->binary_near_history = (unsigned int*)malloc((max_lookahead + 1) * sizeof(unsigned int));
+        self->binary_near_history = (unsigned int*)calloc((max_lookahead + 1), sizeof(unsigned int));
         malloc_fail |= (self->binary_near_history == NULL);
 
-        self->histogram = (float*)malloc((farend->history_size + 1) * sizeof(float));
+        self->histogram = (float*)calloc((farend->history_size + 1), sizeof(float));
         malloc_fail |= (self->histogram == NULL);
 
         if (malloc_fail)

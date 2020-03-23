@@ -23,7 +23,7 @@ class AthenaSignal:
     """
     This model does AEC/NS/AGC/HPF/MVDR on input wav.
     """
-    def __init__(self, feature_switch=[1, 1, 0, 0, 0], mic_num=1, ref_num=1):
+    def __init__(self, feature_switch=[1, 1, 0, 0, 0, 0], mic_num=1, ref_num=1):
         self.feature_switch=feature_switch
         self.mic_num=mic_num
         self.ref_num=ref_num
@@ -32,16 +32,19 @@ class AthenaSignal:
         """
         Set params.
         :param config: Contains seven optional parametres:
-                --add_AEC         : If True, do AEC on  signal.
-                                    (bool, default = True)
-                --add_NS         : If True, do NS on signal.
-                                    (bool, default = True)
-                --add_AGC         : If True, do AGC on signal.
-                                    (bool, default = False)
-                --add_HPF         : If True, do HPF on signal.
-                                    (bool, default = False)
-                --add_MVDR        : If True, do MVDR on signal.
-                                    (bool, default = False)
+                --add_AEC         : If 1, do AEC on  signal.
+                                    (int, default = 1)
+                --add_NS          : If 1, do NS on signal.
+                                    (int, default = 1)
+                --add_AGC         : If 1, do AGC on signal.
+                                    (int, default = 0)
+                --add_HPF         : If 1, do HPF on signal.
+                                    (int, default = 0)
+                --add_BF          : If 1, do MVDR on signal.
+                                    If 2, do GSC on signal.
+                                    (int, default = 0)
+                --add_DOA         : If 1, do DOA on signal.
+                                    (int, default = 0)
                 --mic_num         : Number of microphones.
                                     (int, default = 1)
                 --ref_num         : Number of reference channel.
@@ -52,46 +55,28 @@ class AthenaSignal:
         :return: None
         """
         if 'add_AEC' in config:
-            if config['add_AEC']:
-                self.feature_switch[0] = 1
-            else:
-                self.feature_switch[0] = 0
+            self.feature_switch[0] = config['add_AEC']
         if 'add_NS' in config:
-            if config['add_NS']:
-                self.feature_switch[1] = 1
-            else:
-                self.feature_switch[1] = 0
+            self.feature_switch[1] = config['add_NS']
         if 'add_AGC' in config:
-            if config['add_AGC']:
-                self.feature_switch[2] = 1
-            else:
-                self.feature_switch[2] = 0
+            self.feature_switch[2] = config['add_AGC']
         if 'add_HPF' in config:
-            if config['add_HPF']:
-                self.feature_switch[3] = 1
-            else:
-                self.feature_switch[3] = 0
-        if 'add_MVDR' in config:
-            if config['add_MVDR']:
-                self.feature_switch[4] = 1
-            else:
-                self.feature_switch[4] = 0
+            self.feature_switch[3] = config['add_HPF']
+        if 'add_BF' in config:
+            self.feature_switch[4] = config['add_BF']
+        if 'add_DOA' in config:
+            self.feature_switch[5] = config['add_DOA']
         if 'mic_num' in config:
             self.mic_num = config['mic_num']
         if 'ref_num' in config:
             self.ref_num = config['ref_num']
 
-        conf = []
-        for s in self.feature_switch:
-            if s == 1:
-                conf.append('True')
-            else:
-                conf.append('False')
-
 
         print('#################################################')
         print('The configurations are: add_AEC: {}, add_NS: {}, add_AGC: {}, add_HPF: {},'
-              ' add_MVDR: {}'.format(conf[0], conf[1], conf[2], conf[3], conf[4]))
+              ' add_BF: {}, add_DOA: {}'.format(self.feature_switch[0], self.feature_switch[1], 
+                self.feature_switch[2], self.feature_switch[3], self.feature_switch[4], 
+                self.feature_switch[5]))
         print('The number of microphones is: ', self.mic_num)
         print('The number of reference channels is: ', self.ref_num)
 

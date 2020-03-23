@@ -29,7 +29,9 @@ directories = [
       "athena_signal/kernels/dios_ssp_hpf",
       "athena_signal/kernels/dios_ssp_vad",
       "athena_signal/kernels/dios_ssp_agc",
-      "athena_signal/kernels/dios_ssp_aec/dios_ssp_aec_tde"]
+      "athena_signal/kernels/dios_ssp_aec/dios_ssp_aec_tde",
+      "athena_signal/kernels/dios_ssp_doa",
+      "athena_signal/kernels/dios_ssp_gsc"]
 
 source_list = []
 depends_list = []
