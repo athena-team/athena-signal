@@ -35,9 +35,9 @@ typedef	struct
 } PlaneCoord;
 
 typedef struct {
-	float  rho;        ///< distance, currently must be 1
-	float  phi;        ///< horizontal angle, value range from -PI/2 to PI/2 (PI is 3.1415926535)
-	float  theta;      ///< vertical angle, currently must be zero
+	float  rho;        ///< distance (metre)
+	float  phi;        ///< horizontal angle (Radian), value range from 0 to 2*PI (PI is 3.1415926535)
+	float  theta;      ///< vertical angle (Radian), value range from 0 to PI
 } PolarCoord;
 
 typedef struct

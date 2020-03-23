@@ -72,7 +72,7 @@ void* dios_ssp_hpf_init_api(void)
 {
     void* ptr = NULL;
     objHPF *srv;
-	ptr = (void*)malloc(sizeof(objHPF));
+	ptr = (void*)calloc(1, sizeof(objHPF));
     srv = (objHPF *)ptr;
     int i;
 

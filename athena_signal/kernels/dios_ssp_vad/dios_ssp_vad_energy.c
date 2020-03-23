@@ -116,7 +116,6 @@ typedef struct {
 	float dev_thld;                              
     objNoiseLevel *energyvad_noise_est;
 
-	// CFFT object to perform FFT operations
     void *rfft_param;
 	float *vad_fftbuf_in;
     float *vad_fft_out;
@@ -142,7 +141,7 @@ void* dios_ssp_energy_vad_init(int vad_type)
     void* energyvad_ptr = NULL;
     objENERGYVAD *vad_param;
     int j = 0;
-    energyvad_ptr = (void*)malloc(sizeof(objENERGYVAD));
+    energyvad_ptr = (void*)calloc(1, sizeof(objENERGYVAD));
     vad_param = (objENERGYVAD *)energyvad_ptr;
     if (vad_type == 0) 
     {
@@ -265,7 +264,7 @@ void* dios_ssp_energy_vad_init(int vad_type)
     vad_param->in_buffer = (float *)calloc(FRM_LEN, sizeof(float));
     vad_param->out_buffer = (float *)calloc(FRM_LEN, sizeof(float));
 
-    vad_param->energyvad_noise_est = (objNoiseLevel *)malloc(sizeof(objNoiseLevel));
+    vad_param->energyvad_noise_est = (objNoiseLevel *)calloc(1, sizeof(objNoiseLevel));
     dios_ssp_share_noiselevel_init(vad_param->energyvad_noise_est, 90000.0f, 0.00001f, vad_param->nl_run_min_len); 
 
     vad_param->voice_detect_state = FALSE;

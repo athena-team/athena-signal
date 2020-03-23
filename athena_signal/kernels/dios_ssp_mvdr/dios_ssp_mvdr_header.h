@@ -24,8 +24,8 @@ limitations under the License.
 #include "dios_ssp_mvdr_macros.h"
 #include "dios_ssp_mvdr_win.h"
 #include "../dios_ssp_share/dios_ssp_share_typedefs.h"
-#include "dios_ssp_mvdr_cinv.h"
 #include "../dios_ssp_share/dios_ssp_share_rfft.h"
+#include "../dios_ssp_share/dios_ssp_share_cinv.h"
 
 typedef struct
 {
@@ -109,7 +109,7 @@ typedef struct
 
 	PlaneCoord *cood;
 	objMVDRCwin *mvdrwin;
-	objMVDRCinv *mvdrinv;
+	void *mvdrinv;
 	void *mvdr_fft;
 	float *fft_in;
 	float *fft_out;

@@ -42,20 +42,20 @@ objTDE* dios_ssp_aec_tde_init(int mic_num, int ref_num, int frm_len)
     srv->audioBuf_mic  = NULL;
     srv->audioBuf_ref  = NULL;
   
-    srv->audioBuf_mic = (float **) malloc(srv->mic_num * sizeof(float*));
+    srv->audioBuf_mic = (float **)calloc(srv->mic_num, sizeof(float*));
     for (i = 0; i < srv->mic_num; i++)
     {
-	    srv->audioBuf_mic[i] = (float*)malloc(sizeof(float) * DELAY_BUFFER_SIZE);
+	    srv->audioBuf_mic[i] = (float*)calloc(DELAY_BUFFER_SIZE, sizeof(float));
     }
     
-    srv->audioBuf_ref = (float **) malloc(srv->ref_num * sizeof(float*));
+    srv->audioBuf_ref = (float **)calloc(srv->ref_num, sizeof(float*));
     for(i = 0; i < srv->ref_num; i++)
     {
-	    srv->audioBuf_ref[i] = (float *) malloc(DELAY_BUFFER_SIZE * sizeof(float));
+	    srv->audioBuf_ref[i] = (float *)calloc(DELAY_BUFFER_SIZE, sizeof(float));
     }
     
-    srv->tdeBuf_ref = (float *) malloc(PART_LEN * sizeof(float));	
-    srv->tdeBuf_mic = (float *) malloc(PART_LEN * sizeof(float));
+    srv->tdeBuf_ref = (float *)calloc(PART_LEN, sizeof(float));	
+    srv->tdeBuf_mic = (float *)calloc(PART_LEN, sizeof(float));
     
     /* long-term tde */ 
     ret = dios_ssp_aec_tde_creatcore(&srv->tde_long, MAX_DELAY_LONG, DELAY_WIN_SLIDE_TDE); 

@@ -105,6 +105,15 @@ typedef struct {
 	float *gain_sort;
 	int frame_index;
 	int each_block_frame_num;
+	float final_smooth_gain;
+	float final_smooth_gain_fac;
+	float max_gain;
+	short beginning_silence_checking_flag;
+	float silence_signal_thr;
+	short beginning_proc_flag;
+	int beginning_smooth_frm_cnt;
+	float small_signal_thr;
+	int useful_gain_sort_count;
 
 	//direction vad use
 	float gain_in_dir;
@@ -271,10 +280,10 @@ float gain_smooth(float gain, objGainSmooth *st_gs, float gain_delay, float vads
 
 void* dios_ssp_agc_init_api(int frame_len, float peak_val, int mode_type)
 {
-    int k;
+    int i,k;
 
 	void* ptr = NULL;
-	ptr = (void*)malloc(sizeof(objAGC));
+	ptr = (void*)calloc(1,sizeof(objAGC));
 	objAGC *srv;
 	srv = (objAGC *)ptr;
 	srv->mode_type = mode_type;
@@ -287,14 +296,30 @@ void* dios_ssp_agc_init_api(int frame_len, float peak_val, int mode_type)
 	srv->gain_agc_delay = 1.0f;
 	srv->gain_agc = 1.0f;
 	srv->each_block_frame_num = srv->block_len / (srv->frame_len);
+	srv->final_smooth_gain = 1.0f;
+	srv->final_smooth_gain_fac = 0.8f;
+	srv->max_gain = 100.0f;
+	srv->beginning_silence_checking_flag = 1;
+	srv->silence_signal_thr = 10.0f;
+	srv->beginning_proc_flag = 1;
+	srv->beginning_smooth_frm_cnt = 3;
+	srv->small_signal_thr = 100.0f;
+	srv->useful_gain_sort_count = 0;
+
 
 	srv->vad_buffer = (int *)calloc(srv->each_block_frame_num, sizeof(int));
 	srv->gain_agc_buffer = (float *)calloc(srv->each_block_frame_num, sizeof(float));
 	srv->gain_sort = (float *)calloc(srv->each_block_frame_num, sizeof(float));
+	for (i = 0; i < srv->each_block_frame_num; i++)
+	{
+		srv->vad_buffer[i] = 0;
+		srv->gain_agc_buffer[i] = 1.0f;
+		srv->gain_sort[i] = 1.0f;
+	}
 	srv->frame_index = 0;
 	srv->first_flag = 1;
 
-	srv->st_gc = (objGainCalc *)malloc(sizeof(objGainCalc));
+	srv->st_gc = (objGainCalc *)calloc(1, sizeof(objGainCalc));
 	srv->st_gc->def_max_peak_val = peak_val;
 	srv->st_gc->defs_max_rms_enrg = 0.70710678118655f * 32767.0f * 0.7f;
 	srv->st_gc->defs_clip_val = 26000.0f;
@@ -306,7 +331,7 @@ void* dios_ssp_agc_init_api(int frame_len, float peak_val, int mode_type)
 	srv->st_gc->gain_smooth_fac = xsmooth_factor(8.0f);
 	srv->st_gc->first_flag = 1;
 	
-	srv->st_gs = (objGainSmooth *)malloc(sizeof(objGainSmooth));
+	srv->st_gs = (objGainSmooth *)calloc(1, sizeof(objGainSmooth));
 	srv->st_gs->gain_min = 3000.0f;
 	srv->st_gs->gain_max = 3000.0f;
 	srv->st_gs->gain_min_tmp = 3000.0f;
@@ -334,7 +359,7 @@ void* dios_ssp_agc_init_api(int frame_len, float peak_val, int mode_type)
 	srv->st_wake = NULL;
 	
 	//init wakeup buffer gain and var.
-	srv->st_wake = (objWakeupGainInfo*)malloc(sizeof(objWakeupGainInfo));
+	srv->st_wake = (objWakeupGainInfo*)calloc(1, sizeof(objWakeupGainInfo));
 	srv->st_wake->cache_len = 1000;      //buffer the nearest 1000 frames gain = 8s
 	srv->st_wake->max_ushort = 65535;
 	srv->st_wake->max_kws_word_num = 10;
@@ -343,40 +368,29 @@ void* dios_ssp_agc_init_api(int frame_len, float peak_val, int mode_type)
 	srv->st_wake->tick_kws_now = 0;
 	srv->st_wake->tick_kws_last = 0;
 	srv->st_wake->median_filter_len = 5; //median filter len
-	srv->st_wake->kws_gain_buffer = (float*)malloc(srv->st_wake->cache_len * sizeof(float));
-	memset(srv->st_wake->kws_gain_buffer, 0, srv->st_wake->cache_len * sizeof(float));
-	srv->st_wake->each_kws_gain_buffer = (float**)malloc(srv->st_wake->max_kws_word_num * sizeof(float*));
+	srv->st_wake->kws_gain_buffer = (float*)calloc(srv->st_wake->cache_len, sizeof(float));
+	srv->st_wake->each_kws_gain_buffer = (float**)calloc(srv->st_wake->max_kws_word_num, sizeof(float*));
 	for (k = 0; k < srv->st_wake->max_kws_word_num; k++) 
     {
-		srv->st_wake->each_kws_gain_buffer[k] = (float*)malloc(srv->st_wake->cache_len * sizeof(float));
-		memset(srv->st_wake->each_kws_gain_buffer[k], 0, srv->st_wake->cache_len * sizeof(float));
+		srv->st_wake->each_kws_gain_buffer[k] = (float*)calloc(srv->st_wake->cache_len, sizeof(float));
 	}
 
-	srv->st_wake->kws_gain_buffer_sort = (float*)malloc(srv->st_wake->max_kws_word_num * sizeof(float));
-	memset(srv->st_wake->kws_gain_buffer_sort, 0, srv->st_wake->max_kws_word_num * sizeof(float));
+	srv->st_wake->kws_gain_buffer_sort = (float*)calloc(srv->st_wake->max_kws_word_num, sizeof(float));
 
-	srv->st_wake->tick_kws_start = (int*)malloc(srv->st_wake->max_kws_word_num * sizeof(int));
-	srv->st_wake->tick_kws_end = (int*)malloc(srv->st_wake->max_kws_word_num * sizeof(int));
-	srv->st_wake->tick_kws_len = (int*)malloc(srv->st_wake->max_kws_word_num * sizeof(int));
-	memset(srv->st_wake->tick_kws_start, 0, srv->st_wake->max_kws_word_num * sizeof(int));
-	memset(srv->st_wake->tick_kws_end, 0, srv->st_wake->max_kws_word_num * sizeof(int));
-	memset(srv->st_wake->tick_kws_len, 0, srv->st_wake->max_kws_word_num * sizeof(int));
+	srv->st_wake->tick_kws_start = (int*)calloc(srv->st_wake->max_kws_word_num, sizeof(int));
+	srv->st_wake->tick_kws_end = (int*)calloc(srv->st_wake->max_kws_word_num, sizeof(int));
+	srv->st_wake->tick_kws_len = (int*)calloc(srv->st_wake->max_kws_word_num, sizeof(int));
 
-	srv->st_wake->kws_gain = (float*)malloc(srv->st_wake->max_kws_word_num * sizeof(float));
-	srv->st_wake->kws_gain_max = (float*)malloc(srv->st_wake->max_kws_word_num * sizeof(float));
-	srv->st_wake->kws_gain_min = (float*)malloc(srv->st_wake->max_kws_word_num * sizeof(float));
-	memset(srv->st_wake->kws_gain, 0, srv->st_wake->max_kws_word_num * sizeof(float));
-	memset(srv->st_wake->kws_gain_max, 0, srv->st_wake->max_kws_word_num * sizeof(float));
-	memset(srv->st_wake->kws_gain_min, 0, srv->st_wake->max_kws_word_num * sizeof(float));
+	srv->st_wake->kws_gain = (float*)calloc(srv->st_wake->max_kws_word_num, sizeof(float));
+	srv->st_wake->kws_gain_max = (float*)calloc(srv->st_wake->max_kws_word_num, sizeof(float));
+	srv->st_wake->kws_gain_min = (float*)calloc(srv->st_wake->max_kws_word_num, sizeof(float));
 	
-	srv->st_wake->kws_gain_min_filter = (float**)malloc(srv->st_wake->max_kws_word_num * sizeof(float*));
-	srv->st_wake->kws_gain_max_filter = (float**)malloc(srv->st_wake->max_kws_word_num * sizeof(float*));
+	srv->st_wake->kws_gain_min_filter = (float**)calloc(srv->st_wake->max_kws_word_num, sizeof(float*));
+	srv->st_wake->kws_gain_max_filter = (float**)calloc(srv->st_wake->max_kws_word_num, sizeof(float*));
 	for (k = 0; k < srv->st_wake->max_kws_word_num; k++) 
     {
-		srv->st_wake->kws_gain_min_filter[k] = (float*)malloc(srv->st_wake->median_filter_len * sizeof(float));
-		srv->st_wake->kws_gain_max_filter[k] = (float*)malloc(srv->st_wake->median_filter_len * sizeof(float));
-		memset(srv->st_wake->kws_gain_min_filter[k], 0, srv->st_wake->median_filter_len * sizeof(float));
-		memset(srv->st_wake->kws_gain_max_filter[k], 0, srv->st_wake->median_filter_len * sizeof(float));
+		srv->st_wake->kws_gain_min_filter[k] = (float*)calloc(srv->st_wake->median_filter_len, sizeof(float));
+		srv->st_wake->kws_gain_max_filter[k] = (float*)calloc(srv->st_wake->median_filter_len, sizeof(float));
 	}
 	
     return(ptr);
@@ -400,6 +414,16 @@ int dios_ssp_agc_reset_api(void* ptr)
 	srv->frame_index = 0;
 	srv->first_flag = 1;
 
+	srv->final_smooth_gain = 1.0f;
+	srv->final_smooth_gain_fac = 0.8f;
+	srv->max_gain = 100.0f;
+	srv->beginning_silence_checking_flag = 1;
+	srv->silence_signal_thr = 10.0f;
+	srv->beginning_proc_flag = 1;
+	srv->beginning_smooth_frm_cnt = 3;
+	srv->small_signal_thr = 100.0f;
+	srv->useful_gain_sort_count = 0;
+
 	srv->st_gc->peak_val = 0;
 	srv->st_gc->peak_hold_cnt = 0;
 	srv->st_gc->first_flag = 1;
@@ -418,8 +442,8 @@ int dios_ssp_agc_reset_api(void* ptr)
 	for (i = 0; i < srv->each_block_frame_num; i++) 
     {
 		srv->vad_buffer[i] = 0;
-		srv->gain_agc_buffer[i] = 0;
-		srv->gain_sort[i] = 0;
+		srv->gain_agc_buffer[i] = 1.0f;
+		srv->gain_sort[i] = 1.0f;
 	}
 
 	//wakeup control agc reset
@@ -460,39 +484,101 @@ int dios_ssp_agc_process_api(void* ptr, float* io_buf, int vad_sig, int vad_dir,
 	float gain_curr = 0.0f;
 	int i, k = 0;
 	float vadsum = 0.0f;
+	float env = 0;
+	float max_env = 0;
+	int sort_idx;
 	
 	if (NULL == ptr)
     {
 		return ERROR_AGC;
+	}	
+
+	//max envelope calculation for beginning process
+	if ((srv->beginning_silence_checking_flag == 1) || (srv->beginning_proc_flag == 1))
+	{
+		for (i = 0; i < srv->frame_len; i++)
+		{
+			env = (float)fabs(io_buf[i]);
+			if (env > max_env)
+			{
+				max_env = env;
+			}
+		}
 	}
-	
+
+	//silence signal process directly return and not used for any other calculation
+	if ((vad_sig == 0) && (srv->beginning_silence_checking_flag == 1) && (max_env < srv->silence_signal_thr))
+	{
+		return 0;
+	}
+	else
+	{
+		srv->beginning_silence_checking_flag = 0;
+	}	
+
 	srv->vad_buffer[srv->frame_index] = vad_sig;
 	gain_calc(io_buf, srv->st_gc, &gain_curr, &noclip_gain);
 	srv->gain_agc_buffer[srv->frame_index] = gain_curr;
-	srv->frame_index++;
-	srv->frame_index = (srv->frame_index) % (srv->each_block_frame_num);
 	if (srv->frame_index == 0 && srv->first_flag == 1)
-    {
+	{
 		srv->first_flag = 0;
 	}
-
+	srv->frame_index++;
+    srv->frame_index = (srv->frame_index) % (srv->each_block_frame_num);
+	srv->useful_gain_sort_count++;
+	if (srv->useful_gain_sort_count > srv->each_block_frame_num)
+	{
+		srv->useful_gain_sort_count = srv->each_block_frame_num;
+	}
     memcpy(srv->gain_sort, srv->gain_agc_buffer, sizeof(float) * srv->each_block_frame_num);
 	gain_sort(srv->gain_sort, 0, srv->each_block_frame_num - 1);
 
-	if (srv->first_flag == 0 && vad_sig != 0)
-    {	
+	// small signal process
+	if ((srv->beginning_proc_flag == 1) && (max_env < srv->small_signal_thr))
+	{
+		return 0;
+	}
+	else
+	{
+		srv->beginning_proc_flag = 0;
+	}
+
+	if ((srv->first_flag == 0) && (vad_sig != 0))
+    {
 		for (k = 0; k < srv->each_block_frame_num; k++)
         {
 			vadsum += (float)srv->vad_buffer[k];
 		}
-		final_gain = gain_smooth(srv->gain_sort[1], srv->st_gs, srv->gain_agc_delay, vadsum, srv->each_block_frame_num);
-		srv->gain_agc = final_gain;
-		srv->gain_agc_delay = srv->gain_agc;
-		final_gain = xmin(final_gain, noclip_gain);
-			
+
+		sort_idx = srv->each_block_frame_num - srv->useful_gain_sort_count + 1;			
+		if (sort_idx > srv->each_block_frame_num - 1)
+		{
+			sort_idx = srv->each_block_frame_num - 1;
+		}
+		final_gain = gain_smooth(srv->gain_sort[sort_idx], srv->st_gs, srv->gain_agc_delay, vadsum, srv->each_block_frame_num);
+
+		if (srv->beginning_smooth_frm_cnt > 0)
+		{
+			sort_idx = srv->each_block_frame_num - srv->useful_gain_sort_count;
+			if (sort_idx > srv->each_block_frame_num - 1)
+			{
+				sort_idx = srv->each_block_frame_num - 1;
+			}
+			srv->final_smooth_gain = srv->final_smooth_gain_fac * srv->final_smooth_gain + (1.0f - srv->final_smooth_gain_fac) * srv->gain_sort[sort_idx];
+			srv->beginning_smooth_frm_cnt--;
+		}
+		else
+		{
+			srv->final_smooth_gain = srv->final_smooth_gain_fac * srv->final_smooth_gain + (1.0f - srv->final_smooth_gain_fac) * final_gain;			
+		}
+		
+		srv->final_smooth_gain = xmin(srv->final_smooth_gain, noclip_gain);
+		srv->final_smooth_gain = xmin(srv->final_smooth_gain, srv->max_gain);
+		srv->gain_agc_delay = srv->final_smooth_gain;
+
 		for (i = 0; i < srv->frame_len; i++)
 		{
-			io_buf[i] *= final_gain;
+			io_buf[i] *= srv->final_smooth_gain;
 		}
 	}
 	else 

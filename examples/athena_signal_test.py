@@ -24,18 +24,18 @@ if __name__ == "__main__":
     input_file = ["examples/0841-0875_env7_sit1_male_in.pcm"]
     ref_file = ["examples/0841-0875_env7_sit1_male_ref.pcm"]
     out_file = ["examples/0841-0875_env7_sit1_male_out.pcm"]
-    config = {'add_AEC': True, 'add_MVDR': False}
+    config = {'add_AEC': 1, 'add_BF': 0}
     athena_signal_process(input_file, out_file, ref_file, config)
 
-    # Test MVDR
+    # Test BF
     input_file = ["examples/m0f60_5cm_1_mix.pcm",
                   "examples/m0f60_5cm_2_mix.pcm",
                   "examples/m0f60_5cm_3_mix.pcm",
                   "examples/m0f60_5cm_4_mix.pcm",
                   "examples/m0f60_5cm_5_mix.pcm",
                   "examples/m0f60_5cm_6_mix.pcm"]
-    out_file = ["examples/m0f60_5cm_mvdr_out.pcm"]
-    config = {'add_AEC': False, 'add_MVDR': True, 'mic_num': 6}
+    out_file = ["examples/m0f60_5cm_bf_out.pcm"]
+    config = {'add_AEC': 0, 'add_BF': 2, 'add_DOA': 0, 'mic_num': 6, 'ref_num': 0}
     mic_coord = [[0.05, 0.0, 0.0],
                  [0.025, 0.0433, 0.0],
                  [-0.025, 0.0433, 0.0],

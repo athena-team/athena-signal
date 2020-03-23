@@ -14,22 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef _DIOS_SSP_RETURN_DEFS_H_
-#define _DIOS_SSP_RETURN_DEFS_H_
+#ifndef _DIOS_SSP_SHARE_CINV_H_
+#define _DIOS_SSP_SHARE_CINV_H_
 
-typedef enum 
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct
 {
-	OK_AUDIO_PROCESS,
-	ERROR_AUDIO_PROCESS,
-	ERROR_AEC,
-	ERROR_VAD,
-    ERROR_MVDR,
-	ERROR_GSC,
-	ERROR_DOA,
-	ERROR_HPF,
-	ERROR_NS,
-	ERROR_AGC
-} FUN_RETURN;
+	int dim;		
+	float **ar;
+	float **ai;
+	float **mat_temp;
+	float **mat_temp2;
+}objMATRIXinv;
 
-#endif  /* _DIOS_SSP_RETURN_DEFS_H_ */
+void *dios_ssp_matrix_inv_init(int Rdim);
+int dios_ssp_matrix_inv_process(void *matrix_inv, float *R, float *Rinv);
+int dios_ssp_matrix_inv_delete(void *matrix_inv);
+
+#endif /* _DIOS_SSP_SHARE_CINV_H_ */
 

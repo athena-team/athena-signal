@@ -12,24 +12,18 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+Description: delay line in the time domain
 ==============================================================================*/
 
-#ifndef _DIOS_SSP_RETURN_DEFS_H_
-#define _DIOS_SSP_RETURN_DEFS_H_
+#include "dios_ssp_gsc_dsptools.h"
 
-typedef enum 
+void delayline(float *x, float *xdline, int dly, int line_size)
 {
-	OK_AUDIO_PROCESS,
-	ERROR_AUDIO_PROCESS,
-	ERROR_AEC,
-	ERROR_VAD,
-    ERROR_MVDR,
-	ERROR_GSC,
-	ERROR_DOA,
-	ERROR_HPF,
-	ERROR_NS,
-	ERROR_AGC
-} FUN_RETURN;
-
-#endif  /* _DIOS_SSP_RETURN_DEFS_H_ */
+	if (dly != 0)
+    {
+		memmove(xdline, &xdline[line_size - dly], dly * sizeof(float));
+    }
+	memcpy(&xdline[dly], x, (line_size - dly) * sizeof(float));
+}
 

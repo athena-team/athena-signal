@@ -400,7 +400,7 @@ void* dios_ssp_aec_tde_creatdelayestimatorfarend(int spectrum_size, int history_
 
     if (spectrum_size >= kBandLast)
     {
-        self = (DelayEstimatorFarend*)malloc(sizeof(DelayEstimator));
+        self = (DelayEstimatorFarend*)calloc(1, sizeof(DelayEstimator));
     }
 
     if (self != NULL)
@@ -412,7 +412,7 @@ void* dios_ssp_aec_tde_creatdelayestimatorfarend(int spectrum_size, int history_
         memory_fail |= (self->binary_farend == NULL);
 
         // Allocate memory for spectrum buffers.
-        self->mean_far_spectrum = (SpectrumType*)malloc(spectrum_size * sizeof(SpectrumType));
+        self->mean_far_spectrum = (SpectrumType*)calloc(spectrum_size, sizeof(SpectrumType));
         memory_fail |= (self->mean_far_spectrum == NULL);
 
         self->spectrum_size = spectrum_size;
@@ -434,7 +434,7 @@ void* dios_ssp_aec_tde_creatdelayestimator(void* farend_handle, int max_lookahea
 
     if (farend_handle != NULL)
     {
-        self = (DelayEstimator*)malloc(sizeof(DelayEstimator));
+        self = (DelayEstimator*)calloc(1, sizeof(DelayEstimator));
     }
 
     if (self != NULL)
@@ -446,8 +446,7 @@ void* dios_ssp_aec_tde_creatdelayestimator(void* farend_handle, int max_lookahea
         memory_fail |= (self->binary_handle == NULL);
 
         // Allocate memory for spectrum buffers.
-        self->mean_near_spectrum = (SpectrumType*)malloc(farend->spectrum_size *
-                                      sizeof(SpectrumType));
+        self->mean_near_spectrum = (SpectrumType*)calloc(farend->spectrum_size, sizeof(SpectrumType));
         memory_fail |= (self->mean_near_spectrum == NULL);
 
         self->spectrum_size = farend->spectrum_size;
@@ -485,7 +484,7 @@ int dios_ssp_aec_tde_robust_validation(void* handle, int enable)
 /* initialization */
 int dios_ssp_aec_tde_creatcore(AecmCore_t **aecmInst, int max_delay_size, int win_slide)
 {
-    AecmCore_t *srv = (AecmCore_t*)malloc(sizeof(AecmCore_t));
+    AecmCore_t *srv = (AecmCore_t*)calloc(1, sizeof(AecmCore_t));
     *aecmInst = srv;
     if (srv == NULL)
     {
@@ -565,8 +564,8 @@ int dios_ssp_aec_tde_creatcore(AecmCore_t **aecmInst, int max_delay_size, int wi
 	//srv->max_long_delay_size = MAX_DELAY_LONG; // 750
     srv->delayHistVect    = NULL; 
     srv->delayN    = NULL; 
-    srv->delayHistVect = (int *) malloc(srv->max_delay_size * sizeof(int)); 
-	srv->delayN = (int *) malloc(srv->win_slide * sizeof(int)); //
+    srv->delayHistVect = (int *)calloc(srv->max_delay_size, sizeof(int)); 
+	srv->delayN = (int *)calloc(srv->win_slide, sizeof(int)); //
 
 	return 0;
 }

@@ -68,20 +68,18 @@ void* dios_ssp_vad_counter_init(void)
 {
 	void* vad_counter_handle = NULL;
 	VAD_COUNTER *srv;
-	vad_counter_handle = (void*)malloc(sizeof(VAD_COUNTER));
+	vad_counter_handle = (void*)calloc(1, sizeof(VAD_COUNTER));
 	srv = (VAD_COUNTER *)vad_counter_handle;
 	srv->vad_certainty_counter_length = VAD_CERTAINTY_COUNTER_LENGTH;
 	srv->certainty_buff = NULL;
-	srv->certainty_buff = (float*)malloc(srv->vad_certainty_counter_length * sizeof(float));
-	memset(srv->certainty_buff, 0, srv->vad_certainty_counter_length * sizeof(float));
+	srv->certainty_buff = (float*)calloc(srv->vad_certainty_counter_length, sizeof(float));
 	srv->cnt_index_cert = 0;
 	srv->vad_certainty_cnt = 0;
 	srv->vad_certainty_cnt_thld = CERTAINTY_SUM_THRESH;
 
 	srv->vad_false_counter_length = VAD_FALSE_COUNTER_LENGTH;
 	srv->false_alarm_buff = NULL;
-	srv->false_alarm_buff = (float*)malloc(srv->vad_false_counter_length * sizeof(float));
-	memset(srv->false_alarm_buff, 0, srv->vad_false_counter_length * sizeof(float));
+	srv->false_alarm_buff = (float*)calloc(srv->vad_false_counter_length, sizeof(float));
 	srv->cnt_index_fals = 0;
 	srv->false_alarm_cnt = 0;
 

@@ -44,9 +44,7 @@ int dios_ssp_mvdr_init_diffuse_rnn(objMVDR *ptr_mvdr)
 				ptr_mvdr->m_rxx_in[i*ptr_mvdr->m_channels*2+2*j+1] = 0;
 			}
 		}
-		
-		dios_ssp_mvdr_inv_process(ptr_mvdr->mvdrinv, ptr_mvdr->m_rxx_in, ptr_mvdr->m_irxx_out);
-	
+		dios_ssp_matrix_inv_process(ptr_mvdr->mvdrinv, ptr_mvdr->m_rxx_in, ptr_mvdr->m_irxx_out);	
 		for (i = 0; i < ptr_mvdr->m_channels; ++i)
 		{
 			for (j = 0; j < ptr_mvdr->m_channels; ++j)
@@ -297,12 +295,9 @@ void dios_ssp_mvdr_init(objMVDR *ptr_mvdr, int sensor_num, PlaneCoord* cood)
 			ptr_mvdr->dist[i* ptr_mvdr->m_channels + j] = (float)sqrt(pow(ptr_mvdr->cood[i].x - ptr_mvdr->cood[j].x, 2) + pow(ptr_mvdr->cood[i].y * ptr_mvdr->cood[i].y, 2) + pow(ptr_mvdr->cood[i].z * ptr_mvdr->cood[i].z, 2));
 		}
 	}
-	ptr_mvdr->mvdrinv = (objMVDRCinv*) malloc(sizeof(objMVDRCinv));
-	dios_ssp_mvdr_inv_init(ptr_mvdr->mvdrinv, ptr_mvdr->m_channels);
-	
+	ptr_mvdr->mvdrinv = dios_ssp_matrix_inv_init(ptr_mvdr->m_channels);
 	ptr_mvdr->m_angle_num = (int)((360.0-0.0)/ ptr_mvdr->m_delta_angle);
-
-	ptr_mvdr->mvdrwin = (objMVDRCwin*) malloc(sizeof(objMVDRCwin));
+	ptr_mvdr->mvdrwin = (objMVDRCwin*)calloc(1, sizeof(objMVDRCwin));
 	dios_ssp_mvdr_win_init(ptr_mvdr->mvdrwin, ptr_mvdr->m_fft_size, ptr_mvdr->m_shift_size);
 	
 	ptr_mvdr->mvdr_fft = dios_ssp_share_rfft_init(ptr_mvdr->m_fft_size);
@@ -400,8 +395,8 @@ int dios_ssp_mvdr_process(objMVDR *ptr_mvdr, float* in, float* out, int angle)
 		{
 			ptr_mvdr->m_re[i + ch_idx * ptr_mvdr->m_fft_size] = ptr_mvdr->fft_out[i];
 		}
-		ptr_mvdr->m_im[0] = ptr_mvdr->m_im[ptr_mvdr->m_fft_size - 1] = 0.0;
-		for (i = 1; i < ptr_mvdr->m_fft_size / 2 + 1 - 1; i++)
+		ptr_mvdr->m_im[0] = ptr_mvdr->m_im[ptr_mvdr->m_fft_size / 2] = 0.0;
+		for (i = 1; i < ptr_mvdr->m_fft_size / 2; i++)
 		{
 			ptr_mvdr->m_im[i + ch_idx * ptr_mvdr->m_fft_size] = -ptr_mvdr->fft_out[ptr_mvdr->m_fft_size - i];
 		}
@@ -605,9 +600,7 @@ int dios_ssp_mvdr_cal_weights_adpmvdr(objMVDR *ptr_mvdr)
 				ptr_mvdr->m_rxx_in[j*ptr_mvdr->m_channels*2+2*i+1] = -ptr_mvdr->m_rxx_in[i*ptr_mvdr->m_channels*2+2*j+1];
 			}
 		}
-		
-		dios_ssp_mvdr_inv_process(ptr_mvdr->mvdrinv, ptr_mvdr->m_rxx_in, ptr_mvdr->m_irxx_out);
-		
+		dios_ssp_matrix_inv_process(ptr_mvdr->mvdrinv, ptr_mvdr->m_rxx_in, ptr_mvdr->m_irxx_out);
 		for (i = 0; i < ptr_mvdr->m_channels; ++i)
 		{
 			for (j = 0; j < ptr_mvdr->m_channels; ++j)
@@ -667,7 +660,11 @@ void dios_ssp_mvdr_delete(objMVDR *ptr_mvdr)
 	{
 		ptr_mvdr->mvdr_fft = NULL;
 	}
-	dios_ssp_mvdr_inv_delete(ptr_mvdr->mvdrinv);
+	ret = dios_ssp_matrix_inv_delete(ptr_mvdr->mvdrinv);
+	if (0 != ret)
+	{
+		ptr_mvdr->mvdrinv = NULL;
+	}
 	dios_ssp_mvdr_free_mem(ptr_mvdr);
 }
 

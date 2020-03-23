@@ -45,13 +45,13 @@ RingBuffer* dios_ssp_aec_tde_creatbuffer(size_t element_count, size_t element_si
 		return NULL;
 	}
 
-	self = (RingBuffer*)malloc(sizeof(RingBuffer));
+	self = (RingBuffer*)calloc(1, sizeof(RingBuffer));
 	if (!self)
 	{
 		return NULL;
 	}
 
-	self->data = (char*)malloc(element_count * element_size);
+	self->data = (char*)calloc(element_count * element_size, sizeof(char));
 	if (!self->data)
 	{
 		free(self);
