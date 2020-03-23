@@ -35,7 +35,7 @@ if __name__ == "__main__":
                   "examples/m0f60_5cm_5_mix.pcm",
                   "examples/m0f60_5cm_6_mix.pcm"]
     out_file = ["examples/m0f60_5cm_bf_out.pcm"]
-    config = {'add_AEC': 0, 'add_BF': 2, 'add_DOA': 0, 'mic_num': 6}
+    config = {'add_AEC': 0, 'add_BF': 2, 'add_DOA': 0, 'mic_num': 6, 'ref_num': 0}
     mic_coord = [[0.05, 0.0, 0.0],
                  [0.025, 0.0433, 0.0],
                  [-0.025, 0.0433, 0.0],
