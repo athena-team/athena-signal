@@ -62,7 +62,7 @@ class _SwigNonDynamicMeta(type):
 
 
 
-def dios_ssp_v1(argc, fe_switch, mic_coord, mic_num, ref_num):
-    return _dios_signal.dios_ssp_v1(argc, fe_switch, mic_coord, mic_num, ref_num)
+def dios_ssp_v1(argc, fe_switch, mic_coord, mic_num, ref_num, loc_phi):
+    return _dios_signal.dios_ssp_v1(argc, fe_switch, mic_coord, mic_num, ref_num, loc_phi)
 
 
