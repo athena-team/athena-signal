@@ -3013,10 +3013,11 @@ SWIGINTERN PyObject *_wrap_dios_ssp_v1(PyObject *SWIGUNUSEDPARM(self), PyObject 
   size_t arg6 ;
   int arg7 ;
   int arg8 ;
-  PyObject *swig_obj[5] ;
+  float arg9;
+  PyObject *swig_obj[6] ;
   int result;
   
-  if (!SWIG_Python_UnpackTuple(args, "dios_ssp_v1", 5, 5, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "dios_ssp_v1", 6, 6, swig_obj)) SWIG_fail;
   
   /* Check if is a list */
   if (PyList_Check(swig_obj[0])) {
@@ -3059,11 +3060,12 @@ SWIGINTERN PyObject *_wrap_dios_ssp_v1(PyObject *SWIGUNUSEDPARM(self), PyObject 
   
   
   arg7 = PyInt_AsLong(swig_obj[3]);
-  
-  
+
   arg8 = PyInt_AsLong(swig_obj[4]);
+
+  arg9 = PyFloat_AsDouble(swig_obj[5]);
   
-  result = (int)dios_ssp_v1(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+  result = (int)dios_ssp_v1(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
   resultobj = SWIG_From_int((int)(result));
   
   free((char *) arg2);

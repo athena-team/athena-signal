@@ -82,6 +82,7 @@ class AthenaSignal:
                 self.feature_switch[5]))
         print('The number of microphones is: ', self.mic_num)
         print('The number of reference channels is: ', self.ref_num)
+        print("The source location azimuth is: ", self.loc_phi)
 
         self.mic_coord = np.zeros(3 * self.mic_num, dtype=float)
         if self.feature_switch[4] == 1 and mic_coord is not None:
