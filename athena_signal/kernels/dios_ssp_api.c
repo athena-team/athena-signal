@@ -66,6 +66,7 @@ void* dios_ssp_init_api(objSSP_Param *SSP_PARAM)
     srv->cfg_frame_len = 128;
     srv->cfg_mic_num = SSP_PARAM->mic_num;
     srv->cfg_ref_num = SSP_PARAM->ref_num;;
+    srv->cfg_wakeup_loc_phi = SSP_PARAM->loc_phi;
     for(i=0; i<srv->cfg_mic_num; i++)
     {
         srv->cfg_mic_coord[i].x = SSP_PARAM->mic_coord[i].x;
@@ -114,7 +115,7 @@ void* dios_ssp_init_api(objSSP_Param *SSP_PARAM)
     // variables init 
     srv->dt_st = 1;
     srv->vad_result = 1;
-    srv->cfg_wakeup_loc_phi = 90;
+    srv->cfg_wakeup_loc_phi = SSP_PARAM->loc_phi;
 
 	return ptr;
 }

@@ -23,10 +23,11 @@ class AthenaSignal:
     """
     This model does AEC/NS/AGC/HPF/MVDR on input wav.
     """
-    def __init__(self, feature_switch=[1, 1, 0, 0, 0, 0], mic_num=1, ref_num=1):
+    def __init__(self, feature_switch=[1, 1, 0, 0, 0, 0], mic_num=1, ref_num=1, loc_phi=90.0):
         self.feature_switch=feature_switch
         self.mic_num=mic_num
         self.ref_num=ref_num
+        self.loc_phi=loc_phi
 
     def set_params(self, config=None, mic_coord=None):
         """
@@ -70,6 +71,8 @@ class AthenaSignal:
             self.mic_num = config['mic_num']
         if 'ref_num' in config:
             self.ref_num = config['ref_num']
+        if 'loc_phi' in config:
+            self.loc_phi = config['loc_phi']
 
 
         print('#################################################')
@@ -79,6 +82,7 @@ class AthenaSignal:
                 self.feature_switch[5]))
         print('The number of microphones is: ', self.mic_num)
         print('The number of reference channels is: ', self.ref_num)
+        print("The source location azimuth is: ", self.loc_phi)
 
         self.mic_coord = np.zeros(3 * self.mic_num, dtype=float)
         if self.feature_switch[4] == 1 and mic_coord is not None:
@@ -103,7 +107,7 @@ class AthenaSignal:
             argc.append('-o'.encode())
             for file in out_file:
                 argc.append(file.encode())
-        dios_ssp_v1(argc, self.feature_switch, list(self.mic_coord), self.mic_num, self.ref_num)
+        dios_ssp_v1(argc, self.feature_switch, list(self.mic_coord), self.mic_num, self.ref_num, self.loc_phi)
 
 def athena_signal_process(input_file, out_file, ref_file=None, config=None, mic_coord=None):
     """

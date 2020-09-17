@@ -143,5 +143,9 @@ callable module for Python to call.
   $1 = PyInt_AsLong($input);
 %}
 
+%typemap(in, numinputs=1) (float loc_phi) %{
+  $1 = PyFloat_AsDouble($input);
+%}
 
-int dios_ssp_v1(int argc, char **argv, int *fe_switch, size_t m, float *mic_coord, size_t n, int mic_num, int ref_num);
+
+int dios_ssp_v1(int argc, char **argv, int *fe_switch, size_t m, float *mic_coord, size_t n, int mic_num, int ref_num, float loc_phi);

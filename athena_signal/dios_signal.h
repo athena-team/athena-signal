@@ -21,4 +21,4 @@ limitations under the License.
 #include <time.h>
 #include "kernels/dios_ssp_api.h"
 
-int dios_v1(int argc, char **argv, int *fe_switch, size_t m, float *mic_coord, size_t n, int mic_num, int ref_num);
+int dios_v1(int argc, char **argv, int *fe_switch, size_t m, float *mic_coord, size_t n, int mic_num, int ref_num, float loc_phi);

@@ -41,6 +41,7 @@ typedef struct
     int mic_num;
     int ref_num;
     PlaneCoord mic_coord[16];
+    float loc_phi;
 } objSSP_Param;
     
 /**********************************************************************************
