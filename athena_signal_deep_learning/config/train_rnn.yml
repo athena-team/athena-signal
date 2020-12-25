@@ -1,0 +1,104 @@
+# Copyright (C) 2017 Beijing Didi Infinity Technology and Development Co.,Ltd.
+# All rights reserved.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+
+#### general settings
+name: Dual_Path_RNN
+use_tb_logger: true
+num_spks: 2
+
+#### datasets
+datasets:
+  train:
+    dataroot_mix: [/nfs/volume-225-15/dengchengyun/dengchengyun/trainData/wsj0_mix/2speakers/wav8k/min/tr/mix.json]
+    dataroot_aux: []
+    dataroot_labels: []
+    dataroot_targets: [/nfs/volume-225-15/dengchengyun/dengchengyun/trainData/wsj0_mix/2speakers/wav8k/min/tr/s1.json,
+                       /nfs/volume-225-15/dengchengyun/dengchengyun/trainData/wsj0_mix/2speakers/wav8k/min/tr/s2.json]
+  val:
+    dataroot_mix: [/nfs/volume-225-15/dengchengyun/dengchengyun/trainData/wsj0_mix/2speakers/wav8k/min/cv/mix.json]
+    dataroot_aux: []
+    dataroot_labels: []
+    dataroot_targets: [/nfs/volume-225-15/dengchengyun/dengchengyun/trainData/wsj0_mix/2speakers/wav8k/min/cv/s1.json,
+                       /nfs/volume-225-15/dengchengyun/dengchengyun/trainData/wsj0_mix/2speakers/wav8k/min/cv/s2.json]
+
+  dataloader_setting:
+    shuffle: true
+    num_workers: 2  # per GPU
+    batch_size: 32
+
+  audio_setting:
+    sample_rate: 8000
+    chunk_size: 32000
+    least_size: 16000
+
+Dual_Path_Aux_Speaker:
+  in_channels: 256
+  out_channels: 64
+  hidden_channels: 128
+  sp_channels: 0  # extraction and suppression sp_channels=128, separation sp_channels=0
+  S_R: 3
+  num_speakers: 101
+  P: 3
+  kernel_size: 16
+  rnn_type: LSTM
+  norm: ln
+  dropout: 0
+  bidirectional: true
+  num_layers: 6
+  K: 100
+  num_spks: 2
+
+#### training settings: learning rate scheme, loss
+train:
+  epoch: 200
+  early_stop: 10
+  path: ./data/checkpoint
+  gpuid: [3, 4, 5, 7]
+
+#### Optimizer settings
+optim:
+  name: Adam   ### Adam, RMSprop, SGD
+  lr: !!float 5e-4
+  momentum: 0
+  weight_decay: 0
+  clip_norm: 5
+
+#### scheduler settings
+scheduler:
+  min_lr: !!float 1e-8
+  patience: 2
+  factor: 0.5
+
+#### Resume training settings
+resume:
+  state: false
+  epoch: 10
+  path: ./data/checkpoint
+
+
+#### logger
+logger:
+  name: DPCL
+  path: ./data/log
+  screen: true
+  tofile: true
+  print_freq: 100
+
+#### different model
+model:
+  # MODEL: DPRNN_Speaker_Suppression
+  # MODEL: DPRNN_Speaker_Extraction
+  MODEL: DPRNN_Speech_Separation

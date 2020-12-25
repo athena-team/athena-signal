@@ -59,3 +59,11 @@ dkms.conf
 # OS generated files
 .DS_Store
 .DS_Store?
+
+.vscode
+.data
+.log
+*swp
+__pycache__
+*pyc
+.idea
