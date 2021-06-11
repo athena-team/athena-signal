@@ -10,7 +10,7 @@ swig -python athena_signal/dios_signal.i
 python setup.py bdist_wheel sdist
 
 #3. Pip install the athena-siganl.
-pip install --ignore-installed  dist/athena_signal-*.whl
+pip install --force-reinstall dist/athena_signal-*.whl
 
 #4. Test the athena_signal model. [Optional]
 python examples/athena_signal_test.py

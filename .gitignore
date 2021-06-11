@@ -67,3 +67,8 @@ dkms.conf
 __pycache__
 *pyc
 .idea
+
+# build stuff
+build/
+dist/
+athena_signal.egg-info/
