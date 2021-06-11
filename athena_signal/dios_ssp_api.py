@@ -85,7 +85,7 @@ class AthenaSignal:
         print("The source location azimuth is: ", self.loc_phi)
 
         self.mic_coord = np.zeros(3 * self.mic_num, dtype=float)
-        if self.feature_switch[4] == 1 and mic_coord is not None:
+        if self.feature_switch[4] >= 1 and mic_coord is not None:
             for i in range(self.mic_num):
                 self.mic_coord[i * 3] = mic_coord[i][0]
                 self.mic_coord[i * 3 + 1] = mic_coord[i][1]
